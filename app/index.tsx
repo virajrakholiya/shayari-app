@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, Dimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, FlatList, Dimensions, Share } from 'react-native';
 import { Text, Chip } from 'react-native-paper';
 import { ShayariCard } from './components/ShayariCard';
 import { shayaris, categories, Shayari } from './data/shayaris';
+import { useFavorites } from './context/FavoritesContext';
 
 // Get screen dimensions
 const { width, height } = Dimensions.get('window');
@@ -13,13 +14,28 @@ const verticalScale = (size: number) => (height / 667) * size; // Based on stand
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
 
-  const handleShare = (id: string) => {
-    console.log(`Sharing shayari ${id}`);
+  const handleShare = async (id: string) => {
+    const shayari = shayaris.find((s) => s.id === id);
+    if (shayari) {
+      try {
+        await Share.share({
+          message: `${shayari.content}\n\n- ${shayari.author}`,
+          title: 'Share Shayari',
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    }
   };
 
   const handleLike = (id: string) => {
-    console.log(`Liking shayari ${id}`);
+    if (isFavorite(id)) {
+      removeFromFavorites(id);
+    } else {
+      addToFavorites(id);
+    }
   };
 
   const shuffleArray = (array: Shayari[]) => {
@@ -45,6 +61,7 @@ export default function App() {
       category={item.category}
       onShare={() => handleShare(item.id)}
       onLike={() => handleLike(item.id)}
+      liked={isFavorite(item.id)}
     />
   );
 
@@ -108,58 +125,59 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5E4',
     width: '100%',
-    
   },
   categoriesContainer: {
-    maxHeight: verticalScale(80), // Responsive height
+    maxHeight: verticalScale(80),
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-    height:90
+    borderBottomColor: '#C1D8C3',
+    height: 90,
+    backgroundColor: '#FFF5E4',
   },
   categoriesContent: {
     paddingHorizontal: scale(20),
     paddingVertical: verticalScale(12),
     alignItems: 'center',
+    
   },
   chip: {
     marginRight: scale(12),
     marginVertical: verticalScale(4),
     paddingHorizontal: scale(8),
     paddingVertical: verticalScale(2),
-    backgroundColor: '#fff',
+    backgroundColor: '#FFF5E4',
     borderWidth: 1,
-    borderColor: '#6200ee',
-    minWidth: scale(70), // Minimum width for better touch area
+    borderColor: '#6A9C89',
+    minWidth: scale(70),
   },
   selectedChip: {
-    backgroundColor: '#6200ee',
-    borderColor: '#6200ee',
-    elevation: 2, // Slight shadow for selected state
+    backgroundColor: '#6A9C89',
+    borderColor: '#6A9C89',
+    elevation: 2,
   },
   chipText: {
     fontSize: scale(14),
-    color: '#6200ee',
+    color: '#6A9C89',
   },
   selectedText: {
-    color: '#fff',
+    color: '#FFF5E4',
     fontWeight: '600',
   },
   list: {
     paddingVertical: verticalScale(12),
-    paddingHorizontal: scale(16),
-    flexGrow: 1, // Ensures list takes available space
+    flexGrow: 1,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: scale(20),
-    minHeight: verticalScale(200), 
+    minHeight: verticalScale(200),
+    backgroundColor: '#FFF5E4',
   },
   emptyText: {
     fontSize: scale(16),
-    color: '#666',
+    color: '#FFA725',
   },
 });

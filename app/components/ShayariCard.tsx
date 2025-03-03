@@ -1,15 +1,15 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Card, Text, IconButton } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const theme = {
   colors: {
-    primary: '#6200ee',
-    accent: '#03dac6',
-    background: '#f5f5f5',
-    text: '#333333',
-    secondaryText: '#666666',
+    primary: '#6A9C89',
+    accent: '#FFA725',
+    background: '#FFF5E4',
+    text: '#6A9C89',
+    secondaryText: '#C1D8C3',
   },
   spacing: {
     small: 8,
@@ -42,11 +42,29 @@ export const ShayariCard = React.memo<ShayariCardProps>(({
   onLike,
   liked = false,
 }) => {
+  const scaleAnim = React.useRef(new Animated.Value(1)).current;
+
+  const handleLikePress = () => {
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.2,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      })
+    ]).start();
+    onLike?.();
+  };
+
   return (
     <TouchableOpacity onPress={onPress} style={styles.cardContainer}>
       <Card style={styles.card}>
         <LinearGradient
-          colors={['#f7f7f7', '#e3e3e3']}
+          colors={['#FFF5E4', '#FFF5E4']}
           style={styles.gradient}
         >
           <Card.Content>
@@ -66,17 +84,19 @@ export const ShayariCard = React.memo<ShayariCardProps>(({
                 {category}
               </Text>
               <View style={styles.actions}>
-                <IconButton
-                  icon={liked ? 'heart' : 'heart-outline'}
-                  size={20}
-                  onPress={onLike}
-                  iconColor={liked ? '#e91e63' : theme.colors.secondaryText}
-                />
+                <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                  <IconButton
+                    icon={liked ? 'heart' : 'heart-outline'}
+                    size={20}
+                    onPress={handleLikePress}
+                    iconColor={liked ? '#e91e63' : theme.colors.primary}
+                  />
+                </Animated.View>
                 <IconButton
                   icon="share-variant"
                   size={20}
                   onPress={onShare}
-                  iconColor={theme.colors.secondaryText}
+                  iconColor={theme.colors.primary}
                 />
               </View>
             </View>
