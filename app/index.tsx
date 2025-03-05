@@ -1,183 +1,130 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, Dimensions, Share } from 'react-native';
-import { Text, Chip } from 'react-native-paper';
-import { ShayariCard } from './components/ShayariCard';
-import { shayaris, categories, Shayari } from './data/shayaris';
-import { useFavorites } from './context/FavoritesContext';
+import { View, Text, ImageBackground, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { Link } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-// Get screen dimensions
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
-// Dynamic scaling functions
-const scale = (size: number) => (width / 375) * size; // Based on standard iPhone 6/7/8 width
-const verticalScale = (size: number) => (height / 667) * size; // Based on standard iPhone 6/7/8 height
-
-export default function App() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const { addToFavorites, removeFromFavorites, isFavorite } = useFavorites();
-
-  const handleShare = async (id: string) => {
-    const shayari = shayaris.find((s) => s.id === id);
-    if (shayari) {
-      try {
-        await Share.share({
-          message: `${shayari.content}\n\n- ${shayari.author}`,
-          title: 'Share Shayari',
-        });
-      } catch (error) {
-        console.error('Error sharing:', error);
-      }
+export default function Home() {
+  const features = [
+    {
+      id: 1,
+      title: 'Shayari Collection',
+      description: 'Explore beautiful shayaris',
+      icon: 'book-outline',
+      route: '/shayari'
+    },
+    {
+      id: 2,
+      title: 'Favorites',
+      description: 'View your liked shayaris',
+      icon: 'heart-outline',
+      route: '/favorites'
+    },
+    {
+      id: 3,
+      title: 'Rate App',
+      description: 'Share your feedback',
+      icon: 'star-outline',
+      route: 'https://play.google.com/store'
+    },
+    {
+      id: 4,
+      title: 'More Apps',
+      description: 'Discover our other apps',
+      icon: 'apps-outline',
+      route: 'https://play.google.com/store'
     }
-  };
-
-  const handleLike = (id: string) => {
-    if (isFavorite(id)) {
-      removeFromFavorites(id);
-    } else {
-      addToFavorites(id);
-    }
-  };
-
-  const shuffleArray = (array: Shayari[]) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
-  const filteredShayaris = React.useMemo(() => {
-    const filtered = selectedCategory
-      ? shayaris.filter((shayari) => shayari.category === selectedCategory)
-      : shayaris;
-    return shuffleArray(filtered);
-  }, [selectedCategory]);
-
-  const renderShayari = ({ item }: { item: Shayari }) => (
-    <ShayariCard
-      content={item.content}
-      author={item.author}
-      category={item.category}
-      onShare={() => handleShare(item.id)}
-      onLike={() => handleLike(item.id)}
-      liked={isFavorite(item.id)}
-    />
-  );
+  ];
 
   return (
-    <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.categoriesContainer}
-        contentContainerStyle={styles.categoriesContent}
-      >
-        <Chip
-          mode={selectedCategory === null ? 'flat' : 'outlined'}
-          style={[
-            styles.chip,
-            selectedCategory === null && styles.selectedChip,
-          ]}
-          textStyle={[
-            styles.chipText,
-            selectedCategory === null && styles.selectedText,
-          ]}
-          onPress={() => setSelectedCategory(null)}
-        >
-          All
-        </Chip>
-
-        {categories.filter(category => category !== 'All').map((category) => (
-          <Chip
-            key={category}
-            mode={selectedCategory === category ? 'flat' : 'outlined'}
-            style={[
-              styles.chip,
-              selectedCategory === category && styles.selectedChip,
-            ]}
-            textStyle={[
-              styles.chipText,
-              selectedCategory === category && styles.selectedText,
-            ]}
-            onPress={() => setSelectedCategory(category)}
-          >
-            {category}
-          </Chip>
-        ))}
-      </ScrollView>
-
-      <FlatList
-        data={filteredShayaris}
-        keyExtractor={(item) => item.id}
-        renderItem={renderShayari}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No shayaris found</Text>
+    <ImageBackground
+      source={require('../assets/images/background.jpg')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Gulzar Shayari</Text>
+          <Text style={styles.subtitle}>Express your feelings through words</Text>
+          
+          <View style={styles.grid}>
+            {features.map((feature) => (
+              <Link
+                key={feature.id}
+                href={feature.route as any}
+                asChild
+              >
+                <TouchableOpacity style={styles.card}>
+                  <Ionicons name={feature.icon as any} size={32} color="#fff" />
+                  <Text style={styles.cardTitle}>{feature.title}</Text>
+                  <Text style={styles.cardDescription}>{feature.description}</Text>
+                </TouchableOpacity>
+              </Link>
+            ))}
           </View>
-        }
-      />
-    </View>
+        </View>
+      </View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%'
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    padding: 20
+  },
   container: {
     flex: 1,
-    backgroundColor: '#FFF5E4',
-    width: '100%',
-  },
-  categoriesContainer: {
-    maxHeight: verticalScale(80),
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#C1D8C3',
-    height: 90,
-    backgroundColor: '#FFF5E4',
-  },
-  categoriesContent: {
-    paddingHorizontal: scale(20),
-    paddingVertical: verticalScale(12),
     alignItems: 'center',
-    
+    justifyContent: 'center'
   },
-  chip: {
-    marginRight: scale(12),
-    marginVertical: verticalScale(4),
-    paddingHorizontal: scale(8),
-    paddingVertical: verticalScale(2),
-    backgroundColor: '#FFF5E4',
-    borderWidth: 1,
-    borderColor: '#6A9C89',
-    minWidth: scale(70),
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 10,
+    textAlign: 'center'
   },
-  selectedChip: {
-    backgroundColor: '#6A9C89',
-    borderColor: '#6A9C89',
-    elevation: 2,
+  subtitle: {
+    fontSize: 16,
+    color: '#fff',
+    marginBottom: 40,
+    textAlign: 'center'
   },
-  chipText: {
-    fontSize: scale(14),
-    color: '#6A9C89',
-  },
-  selectedText: {
-    color: '#FFF5E4',
-    fontWeight: '600',
-  },
-  list: {
-    paddingVertical: verticalScale(12),
-    flexGrow: 1,
-  },
-  emptyContainer: {
-    flex: 1,
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'center',
+    gap: 20
+  },
+  card: {
+    width: width * 0.4,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 15,
+    padding: 20,
     alignItems: 'center',
-    padding: scale(20),
-    minHeight: verticalScale(200),
-    backgroundColor: '#FFF5E4',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)'
   },
-  emptyText: {
-    fontSize: scale(16),
-    color: '#FFA725',
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginTop: 10,
+    textAlign: 'center'
   },
-});
+  cardDescription: {
+    fontSize: 12,
+    color: '#fff',
+    opacity: 0.8,
+    marginTop: 5,
+    textAlign: 'center'
+  }
+})

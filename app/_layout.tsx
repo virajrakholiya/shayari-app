@@ -15,7 +15,7 @@ export default function RootLayout() {
           headerStyle: {
             backgroundColor: "#FFA725",
           },
-          title: "Shayari App",
+          title: "Gulzar Shayari ",
           headerTintColor: "#FFF5E4",
           headerTitleStyle: {
             fontWeight: "bold",
@@ -29,7 +29,7 @@ export default function RootLayout() {
         <Stack.Screen
           name="index"
           options={{
-            title: "Shayari",
+            title: "Gulzar Shayari",
             headerRight: () => (
               <Pressable
                 onPress={() => router.push("/favorites")}
