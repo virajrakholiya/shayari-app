@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, Dimensions } from 'react-native';
+import { View, StyleSheet, FlatList, Dimensions, Share } from 'react-native';
 import { Text } from 'react-native-paper';
 import { ShayariCard } from './components/ShayariCard';
 import { shayaris, Shayari } from './data/shayaris';
@@ -17,8 +17,19 @@ export default function FavoritesScreen() {
 
   const favoriteShayaris = shayaris.filter((shayari) => favorites.includes(shayari.id));
 
-  const handleShare = (id: string) => {
-    console.log(`Sharing shayari ${id}`);
+  const handleShare = async (id: string) => {
+    const shayari = shayaris.find((s) => s.id === id);
+    if (shayari) {
+      try {
+        const shareContent = `${shayari.content}\n\n- ${shayari.author}`;
+        await Share.share({
+          message: shareContent,
+          title: 'Share Shayari',
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    }
   };
 
   const handleLike = (id: string) => {
@@ -61,7 +72,6 @@ const styles = StyleSheet.create({
   },
   list: {
     paddingVertical: verticalScale(12),
-    paddingHorizontal: scale(16),
     flexGrow: 1,
   },
   emptyContainer: {

@@ -15,7 +15,7 @@ export default function RootLayout() {
           headerStyle: {
             backgroundColor: "#FFA725",
           },
-          title:"Shayari App",
+          title: "Shayari App",
           headerTintColor: "#FFF5E4",
           headerTitleStyle: {
             fontWeight: "bold",
